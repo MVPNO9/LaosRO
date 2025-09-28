@@ -4,6 +4,9 @@ const closeButton = document.querySelector('.close-menu');
 const menuLinks = document.querySelectorAll('nav a');
 const contentArea = document.getElementById('content-area');
 
+// ตัวแปรเก็บเสียงปัจจุบัน
+let currentAudio = null;
+
 // เปิดเมนู
 toggleButton.addEventListener('click', () => {
   sidebar.classList.add('active');
@@ -36,21 +39,37 @@ menuLinks.forEach(link => {
       const response = await fetch(lessonFile);
       const html = await response.text();
       contentArea.innerHTML = html;
-      attachSoundButtons(); // รีผูกปุ่มเสียงใหม่ทุกครั้ง
+      attachSoundButtons(); // รีเซ็ตและผูกปุ่มเสียงใหม่ทุกครั้ง
     } catch (error) {
       contentArea.innerHTML = `<p style="color:red">ບໍ່ສາມາດໂຫຼດບົດຮຽນໄດ້</p>`;
     }
   });
 });
 
-// ฟังก์ชันเล่นเสียง
+// ฟังก์ชันเล่นเสียง (กดครั้งเดียว)
 function attachSoundButtons() {
   const soundButtons = document.querySelectorAll('.btn-speak');
+  
+  // ลบ event listeners เดิมออกก่อน
   soundButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const soundFile = button.getAttribute('data-sound');
-      const audio = new Audio(soundFile);
-      audio.play();
+    button.replaceWith(button.cloneNode(true));
+  });
+
+  // เลือกปุ่มใหม่หลังจาก clone
+  const newSoundButtons = document.querySelectorAll('.btn-speak');
+  
+  newSoundButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      // ถ้ามีเสียงกำลังเล่นอยู่ ให้หยุดและรีเซ็ตก่อน
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      
+      // เล่นเสียงใหม่
+      const soundFile = this.getAttribute('data-sound');
+      currentAudio = new Audio(soundFile);
+      currentAudio.play();
     });
   });
 }
