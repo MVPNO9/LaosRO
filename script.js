@@ -4,8 +4,10 @@ const closeButton = document.querySelector('.close-menu');
 const menuLinks = document.querySelectorAll('nav a');
 const contentArea = document.getElementById('content-area');
 
-// ตัวแปรเก็บเสียงปัจจุบัน
+// ตัวแปรเก็บสถานะ
 let currentAudio = null;
+let lastClickTime = 0;
+const CLICK_DELAY = 1000; // 1 วินาที
 
 // เปิดเมนู
 toggleButton.addEventListener('click', () => {
@@ -46,7 +48,7 @@ menuLinks.forEach(link => {
   });
 });
 
-// ฟังก์ชันเล่นเสียง (กดครั้งเดียว)
+// ฟังก์ชันเล่นเสียง (มี delay 1 วินาที)
 function attachSoundButtons() {
   const soundButtons = document.querySelectorAll('.btn-speak');
   
@@ -60,6 +62,16 @@ function attachSoundButtons() {
   
   newSoundButtons.forEach(button => {
     button.addEventListener('click', function() {
+      const currentTime = Date.now();
+      
+      // ตรวจสอบว่ายังอยู่ในช่วง delay หรือไม่
+      if (currentTime - lastClickTime < CLICK_DELAY) {
+        return; // ยังไม่ครบ 1 วินาที, ไม่ทำอะไร
+      }
+      
+      // อัพเดทเวลากดล่าสุด
+      lastClickTime = currentTime;
+      
       // ถ้ามีเสียงกำลังเล่นอยู่ ให้หยุดและรีเซ็ตก่อน
       if (currentAudio) {
         currentAudio.pause();
